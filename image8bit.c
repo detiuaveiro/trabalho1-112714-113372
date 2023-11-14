@@ -398,7 +398,6 @@ static inline int G(Image img, int x, int y) {
   assert(0 <= x && x < img->width);
   assert(0 <= y && y < img->height);
 
-
   // Calcula o indice do pixel
   index = y * img->width + x;
 
@@ -437,6 +436,12 @@ void ImageSetPixel(Image img, int x, int y, uint8 level) { ///
 void ImageNegative(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+  // Percorre o array de pixels
+  for (int i = 0; i < img->width * img->height; i++) {
+    // Aplica a transformacao
+    img->pixel[i] = PixMax - img->pixel[i];
+  }
+
 }
 
 /// Apply threshold to image.
@@ -445,6 +450,15 @@ void ImageNegative(Image img) { ///
 void ImageThreshold(Image img, uint8 thr) { ///
   assert (img != NULL);
   // Insert your code here!
+  // Percorre o array de pixels
+  for (int i = 0; i < img->width * img->height; i++) {
+    // Aplica a transformacao
+    if (img->pixel[i] < thr) {
+      img->pixel[i] = 0;
+    } else {
+      img->pixel[i] = img->maxval;
+    }
+  }
 }
 
 /// Brighten image by a factor.
@@ -453,8 +467,18 @@ void ImageThreshold(Image img, uint8 thr) { ///
 /// darken the image if factor<1.0.
 void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
-  // ? assert (factor >= 0.0);
+  assert (factor >= 0.0);
   // Insert your code here!
+
+  // Percorre o array de pixels
+  for (int i = 0; i < img->width * img->height; i++) {
+    // Aplica a transformacao
+    if (img->pixel[i] * factor > img->maxval) {
+      img->pixel[i] = img->maxval;
+    } else {
+      img->pixel[i] = img->pixel[i] * factor;
+    }
+  }
 }
 
 
