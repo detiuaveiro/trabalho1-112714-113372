@@ -171,7 +171,35 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
   assert (width >= 0);
   assert (height >= 0);
   assert (0 < maxval && maxval <= PixMax);
+
   // Insert your code here!
+  // Aloca memória para a estrutura da imagem
+  Image newImage = (Image)malloc(sizeof(struct image));
+  if (newImage == NULL) {
+    errCause = "Memory allocation failed";
+    return NULL;
+  }
+
+  // Inicializa os campos da imagem
+  newImage->width = width;
+  newImage->height = height;
+  newImage->maxval = maxval;
+
+  // Aloca memória para o array de pixels
+  newImage->pixel = (uint8*)malloc(width * height * sizeof(uint8));
+  if (newImage->pixel == NULL) {
+    errCause = "Memory allocation failed";
+    // Libera a memoria alocada para a estrutura da imagem
+    free(newImage);
+    return NULL;
+  }
+
+  // Preenche o array de pixels com 0
+  for (int i = 0; i < width * height; i++) {
+    newImage->pixel[i] = 0;
+  }
+
+  return newImage;
 }
 
 /// Destroy the image pointed to by (*imgp).
@@ -182,6 +210,17 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
 void ImageDestroy(Image* imgp) { ///
   assert (imgp != NULL);
   // Insert your code here!
+  // Verifica se o ponteiro para a imagem não é nulo
+  if (*imgp != NULL) {
+    // Libera o array de pixels
+    free((*imgp)->pixel);
+
+    // Libera a estrutura da imagem
+    free(*imgp);
+
+    // Define o ponteiro para a imagem como nulo
+    *imgp = NULL;
+  }
 }
 
 
