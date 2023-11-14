@@ -333,6 +333,27 @@ int ImageMaxval(Image img) { ///
 void ImageStats(Image img, uint8* min, uint8* max) { ///
   assert (img != NULL);
   // Insert your code here!
+  // Verfica se a imagem não é nula
+  if(img->width <= 0 || img->height <= 0) {
+    *min = 0;
+    *max = 0;
+    return;
+  }
+
+  // Inicializa min e max com valores extremos
+  *min = PixMax;
+  *max = 0;
+
+  // Percorre o array de pixels e atualiza min e max
+  for (int i = 0; i < img->width * img->height; i++) {
+    if (img->pixel[i] < *min) {
+      *min = img->pixel[i];
+    }
+    if (img->pixel[i] > *max) {
+      *max = img->pixel[i];
+    }
+  }
+
 }
 
 /// Check if pixel position (x,y) is inside img.
@@ -345,6 +366,17 @@ int ImageValidPos(Image img, int x, int y) { ///
 int ImageValidRect(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   // Insert your code here!
+  //Verifica se as coordenadas sao validas
+  if (x < 0 || y < 0 || w <= 0 || h <= 0) {
+    return 0;
+  }
+
+  //Verifica se a area esta contida na imagem
+  if (x + w > img->width || y + h > img->height) {
+    return 0;
+  }
+
+  return 1; // Area valida
 }
 
 /// Pixel get & set operations
@@ -360,6 +392,16 @@ int ImageValidRect(Image img, int x, int y, int w, int h) { ///
 static inline int G(Image img, int x, int y) {
   int index;
   // Insert your code here!
+  assert(img != NULL);
+
+  // Verifica se as coordenadas sao validas
+  assert(0 <= x && x < img->width);
+  assert(0 <= y && y < img->height);
+
+
+  // Calcula o indice do pixel
+  index = y * img->width + x;
+
   assert (0 <= index && index < img->width*img->height);
   return index;
 }
