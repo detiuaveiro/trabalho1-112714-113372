@@ -506,6 +506,30 @@ void ImageBrighten(Image img, double factor) { ///
 Image ImageRotate(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+  // Cria uma nova imagem com as dimensoes trocadas
+  Image rotatedImg = ImageCreate(img->height, img->width, img->maxval);
+  if (rotatedImg == NULL) {
+    return NULL;
+  }
+
+  //Preenche a nova imagem co pixels rotacionados
+  for (int y = 0; y < img->height; y++) {
+    for (int x = 0; x < img->width; x++) {
+      //Calcula as coordenadas do pixel na imagem rotacionada
+      int rotatedX = y;
+      int rotatedY = img->width - x - 1;
+
+      //Obtem o indice linear para o pixel na imagem original
+      int originalIndex = y * img->width + x;
+
+      //Obtem o indice linear para o pixel na imagem rotacionada
+      int rotatedIndex = rotatedY * rotatedImg->width + rotatedX;
+
+      //Copia o pixel da imagem original para a imagem rotacionada
+      rotatedImg->pixel[rotatedIndex] = img->pixel[originalIndex];
+    }
+  }
+  return rotatedImg;
 }
 
 /// Mirror an image = flip left-right.
@@ -518,6 +542,31 @@ Image ImageRotate(Image img) { ///
 Image ImageMirror(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+
+  // Cria uma nova imagem com as mesmas dimensoes
+  Image mirroredImg = ImageCreate(img->width, img->height, img->maxval);
+  if (mirroredImg == NULL) {
+    return NULL;
+  }
+
+  //Preenche a nova imagem com os pixels espelhados
+  for (int y = 0; y < img->height; y++) {
+    for (int x = 0; x < img->width; x++) {
+      //Calcula as coordenadas do pixel na imagem espelhada
+      int mirroredX = img->width - x - 1;
+      int mirroredY = y;
+
+      //Obtem o indice linear para o pixel na imagem original
+      int originalIndex = y * img->width + x;
+
+      //Obtem o indice linear para o pixel na imagem espelhada
+      int mirroredIndex = mirroredY * mirroredImg->width + mirroredX;
+
+      //Copia o pixel da imagem original para a imagem espelhada
+      mirroredImg->pixel[mirroredIndex] = img->pixel[originalIndex];
+    }
+  }
+  return mirroredImg;
 }
 
 /// Crop a rectangular subimage from img.
