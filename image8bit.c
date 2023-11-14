@@ -585,6 +585,32 @@ Image ImageCrop(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   assert (ImageValidRect(img, x, y, w, h));
   // Insert your code here!
+
+  // Cria uma nova imagem com as dimensoes do retangulo
+  Image croppedImg = ImageCreate(w, h, img->maxval);
+  if (croppedImg == NULL) {
+    return NULL;
+  }
+  
+  //Preenche a nova imagem com os pixels do retangulo
+  for (int i = 0; i < w * h; i++) {
+    //Calcula as coordenadas do pixel na imagem original
+    int originalX = i % w + x;
+    int originalY = i / w + y;
+
+    //Obtem o indice linear para o pixel na imagem original
+    int originalIndex = originalY * img->width + originalX;
+
+    //Obtem o indice linear para o pixel na imagem recortada
+    int croppedIndex = i;
+
+    //Copia o pixel da imagem original para a imagem recortada
+    croppedImg->pixel[croppedIndex] = img->pixel[originalIndex];
+  }
+  return croppedImg;
+
+  
+
 }
 
 
@@ -599,6 +625,24 @@ void ImagePaste(Image img1, int x, int y, Image img2) { ///
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
+
+  //Preenche a imagem com os pixels da imagem a colar
+  for (int i = 0; i < img2->width * img2->height; i++) {
+    //Calcula as coordenadas do pixel na imagem original
+    int originalX = i % img2->width + x;
+    int originalY = i / img2->width + y;
+
+    //Obtem o indice linear para o pixel na imagem original
+    int originalIndex = originalY * img1->width + originalX;
+
+    //Obtem o indice linear para o pixel na imagem a colar
+    int pasteIndex = i;
+
+    //Copia o pixel da imagem a colar para a imagem original
+    img1->pixel[originalIndex] = img2->pixel[pasteIndex];
+  }
+
+  
 }
 
 /// Blend an image into a larger image.
@@ -612,7 +656,25 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
+
+  // Preenche a imagem com os pixels da imagem a colar
+  for (int i = 0; i < img2->width * img2->height; i++) {
+    // Calcula as coordenadas do pixel na imagem original
+    int destX = i % img2->width + x;
+    int destY = i / img2->width + y;
+
+    // Obtém o índice linear para o pixel na imagem original
+    int destIndex = destY * img1->width + destX;
+
+    // Obtém o índice linear para o pixel na imagem a colar
+    int pasteIndex = i;
+
+    // Combina os pixels usando a fórmula de blending linear
+    img1->pixel[destIndex] = img1->pixel[destIndex] * (1 - alpha) + img2->pixel[pasteIndex] * alpha;
+  }
 }
+
+
 
 /// Compare an image to a subimage of a larger image.
 /// Returns 1 (true) if img2 matches subimage of img1 at pos (x, y).
@@ -622,6 +684,19 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
   assert (img2 != NULL);
   assert (ImageValidPos(img1, x, y));
   // Insert your code here!
+
+  for (int i = 0; i < img2->width * img2->height; i++) {
+    int originalX = i % img2->width + x;
+    int originalY = i / img2->width + y;
+    int originalIndex = originalY * img1->width + originalX;
+    int pasteIndex = i;
+
+    if (img1->pixel[originalIndex] != img2->pixel[pasteIndex]) {
+      return 0; // Imagens diferentes
+    }
+  }
+
+  return 1; // Imagens iguais
 }
 
 /// Locate a subimage inside another image.
@@ -632,8 +707,24 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
   // Insert your code here!
-}
 
+
+  if (img2->width <= 0 || img2->height <= 0 || px == NULL || py == NULL) {
+    return 0; // Dimensões inválidas ou ponteiros nulos
+  }
+
+  for (int y = 0; y < img1->height - img2->height + 1; y++) {
+    for (int x = 0; x < img1->width - img2->width + 1; x++) {
+      if (ImageMatchSubImage(img1, x, y, img2)) {
+        *px = x;
+        *py = y;
+        return 1; // Imagens iguais
+      }
+    }
+  }
+
+  return 0; // Nenhuma correspondência encontrada
+}
 
 /// Filtering
 
@@ -643,5 +734,40 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// The image is changed in-place.
 void ImageBlur(Image img, int dx, int dy) { ///
   // Insert your code here!
+
+  int width = img->width;
+  int height = img->height;
+  uint8* blurredPixels = malloc(sizeof(uint8) * width * height);
+
+  if (blurredPixels == NULL) {
+    // Falha na alocação de memória
+    return;
+  }
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      int sum = 0;
+      int count = 0;
+
+      for (int j = -dy; j <= dy; j++) {
+        for (int i = -dx; i <= dx; i++) {
+          int newX = x + i;
+          int newY = y + j;
+
+          if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+            sum += img->pixel[newY * width + newX];
+            count++;
+          }
+        }
+      }
+
+      blurredPixels[y * width + x] = (count > 0) ? (sum / count) : img->pixel[y * width + x];
+    }
+  }
+
+  // Copia os pixels borrados de volta para a imagem original
+  memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
+  free(blurredPixels);
 }
+
 
