@@ -656,24 +656,14 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
 
-  // Preenche a imagem com os pixels da imagem a colar
   for (int i = 0; i < img2->width * img2->height; i++) {
-    // Calcula as coordenadas do pixel na imagem original
     int destX = i % img2->width + x;
     int destY = i / img2->width + y;
-
-    // Obtém o índice linear para o pixel na imagem original
     int destIndex = destY * img1->width + destX;
-
-    // Obtém o índice linear para o pixel na imagem a colar
     int pasteIndex = i;
 
-    // Combina os pixels usando a fórmula de blending linear
-    img1->pixel[destIndex] = img1->pixel[destIndex] * (1 - alpha) + img2->pixel[pasteIndex] * alpha;
-
-    // Satura os valores para garantir que estejam no intervalo permitido
-    img1->pixel[destIndex] = (img1->pixel[destIndex] > img1->maxval) ? img1->maxval : img1->pixel[destIndex];
-    img1->pixel[destIndex] = (img1->pixel[destIndex] < 0) ? 0 : img1->pixel[destIndex];
+    int blendedValue = (int)(img1->pixel[destIndex] * (1 - alpha) + img2->pixel[pasteIndex] * alpha);
+    img1->pixel[destIndex] = (uint8)saturate(blendedValue, img1->maxval);
   }
 }
 
@@ -735,9 +725,6 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
 void ImageBlur(Image img, int dx, int dy) { ///
-  assert (img != NULL);
-  assert (dx >= 0 && dy >= 0);
-
   int width = img->width;
   int height = img->height;
   uint8* blurredPixels = malloc(sizeof(uint8) * width * height);
@@ -764,11 +751,11 @@ void ImageBlur(Image img, int dx, int dy) { ///
         }
       }
 
-      blurredPixels[y * width + x] = (count > 0) ? (sum / count) : img->pixel[y * width + x];
+      int blurredValue = (count > 0) ? (sum / count) : img->pixel[y * width + x];
+      blurredPixels[y * width + x] = (uint8)saturate(blurredValue, img->maxval);
     }
   }
 
-  // Copia os pixels borrados de volta para a imagem original
   memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
   free(blurredPixels);
 }
