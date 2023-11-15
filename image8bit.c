@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "instrumentation.h"
-
+#include <string.h>
 // The data structure
 //
 // An image is stored in a structure containing 3 fields:
