@@ -655,7 +655,6 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
-  // Insert your code here!
 
   // Preenche a imagem com os pixels da imagem a colar
   for (int i = 0; i < img2->width * img2->height; i++) {
@@ -671,9 +670,12 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
 
     // Combina os pixels usando a fórmula de blending linear
     img1->pixel[destIndex] = img1->pixel[destIndex] * (1 - alpha) + img2->pixel[pasteIndex] * alpha;
+
+    // Satura os valores para garantir que estejam no intervalo permitido
+    img1->pixel[destIndex] = (img1->pixel[destIndex] > img1->maxval) ? img1->maxval : img1->pixel[destIndex];
+    img1->pixel[destIndex] = (img1->pixel[destIndex] < 0) ? 0 : img1->pixel[destIndex];
   }
 }
-
 
 
 /// Compare an image to a subimage of a larger image.
@@ -733,7 +735,8 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
 void ImageBlur(Image img, int dx, int dy) { ///
-  // Insert your code here!
+  assert (img != NULL);
+  assert (dx >= 0 && dy >= 0);
 
   int width = img->width;
   int height = img->height;
