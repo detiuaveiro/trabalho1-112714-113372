@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include "instrumentation.h"
 #include <string.h>
+#include <stdint.h>
 // The data structure
 //
 // An image is stored in a structure containing 3 fields:
@@ -51,7 +52,7 @@ struct image {
   int width;
   int height;
   int maxval;   // maximum gray value (pixels with maxval are pure WHITE)
-  uint8* pixel; // pixel data (a raster scan)
+  uint8_t* pixel; // pixel data (a raster scan)
 };
 
 
