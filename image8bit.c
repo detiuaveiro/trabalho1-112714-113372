@@ -19,6 +19,7 @@
 
 #include "image8bit.h"
 
+#include <math.h>
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -476,7 +477,7 @@ void ImageBrighten(Image img, double factor) { ///
     if (img->pixel[i] * factor > img->maxval) {
       img->pixel[i] = img->maxval;
     } else {
-      img->pixel[i] = img->pixel[i] * factor;
+      img->pixel[i] = round(img->pixel[i] * factor);
     }
   }
 }
