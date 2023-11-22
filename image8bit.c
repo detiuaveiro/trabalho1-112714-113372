@@ -478,7 +478,7 @@ void ImageBrighten(Image img, double factor) { ///
     if (img->pixel[i] * factor > img->maxval) {
       img->pixel[i] = img->maxval;
     } else {
-      img->pixel[i] = round(img->pixel[i] * factor);
+      img->pixel[i] = (int)((img->pixel[i] * factor) + 0.5);
     }
   }
 }
@@ -729,45 +729,55 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 
 /// Filtering
 
-/// Blur an image by a applying a (2dx+1)x(2dy+1) mean filter.
+/// an image by a applying a (2dx+1)x(2dy+1) mean filter.
 /// Each pixel is substituted by the mean of the pixels in the rectangle
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
 void ImageBlur(Image img, int dx, int dy) { ///
-  // Insert your code here!
+    // Obtenha as dimensões da imagem
+    int width = img->width;
+    int height = img->height;
 
-  int width = img->width;
-  int height = img->height;
-  uint8* blurredPixels = malloc(sizeof(uint8) * width * height);
+    // Aloque memória para os pixels borrados
+    uint8* blurredPixels = malloc(sizeof(uint8) * width * height);
 
-  if (blurredPixels == NULL) {
-    // Falha na alocação de memória
-    return;
-  }
-
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      int sum = 0;
-      int count = 0;
-
-      for (int j = -dy; j <= dy; j++) {
-        for (int i = -dx; i <= dx; i++) {
-          int newX = x + i;
-          int newY = y + j;
-
-          if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
-            sum += img->pixel[newY * width + newX];
-            count++;
-          }
-        }
-      }
-
-      blurredPixels[y * width + x] = (count > 0) ? (sum / count) : img->pixel[y * width + x];
+    // Verifique se a alocação de memória foi bem-sucedida
+    if (blurredPixels == NULL) {
+        // Tratamento de falha na alocação de memória
+        return;
     }
-  }
 
-  // Copia os pixels borrados de volta para a imagem original
-  memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
-  free(blurredPixels);
+    // Percorra cada pixel da imagem
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int sum = 0;
+            int count = 0;
+
+            // Percorra a vizinhança do pixel (x, y)
+            for (int j = -dy; j <= dy; j++) {
+                for (int i = -dx; i <= dx; i++) {
+                    // Calcule as coordenadas do pixel vizinho
+                    int newX = x + i;
+                    int newY = y + j;
+
+                    // Verifique se as coordenadas são válidas
+                    if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+                        // Some o valor do pixel vizinho
+                        sum += img->pixel[newY * width + newX];
+                        count++;
+                    }
+                }
+            }
+
+            // Calcule a média e aplique o arredondamento aritmético
+            blurredPixels[y * width + x] = (count > 0) ? (int)(sum / count + 0.5) : img->pixel[y * width + x];
+        }
+    }
+
+    // Copie os pixels borrados de volta para a imagem original
+    memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
+
+    // Libere a memória alocada
+    free(blurredPixels);
 }
 
