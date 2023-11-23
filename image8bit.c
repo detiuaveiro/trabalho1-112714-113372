@@ -471,18 +471,17 @@ void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
   assert (factor >= 0.0);
   // Insert your code here!
-
   // Percorre o array de pixels
   for (int i = 0; i < img->width * img->height; i++) {
     // Aplica a transformacao
     if (img->pixel[i] * factor > img->maxval) {
       img->pixel[i] = img->maxval;
     } else {
+      img->pixel[i] = img->pixel[i] * factor;
       img->pixel[i] = round(img->pixel[i] * factor);
     }
   }
 }
-
 
 /// Geometric transformations
 
@@ -653,28 +652,55 @@ void ImagePaste(Image img1, int x, int y, Image img2) { ///
 /// Requires: img2 must fit inside img1 at position (x, y).
 /// alpha usually is in [0.0, 1.0], but values outside that interval
 /// may provide interesting effects.  Over/underflows should saturate.
-void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
-  assert (img1 != NULL);
-  assert (img2 != NULL);
-  assert (ImageValidRect(img1, x, y, img2->width, img2->height));
-  // Insert your code here!
+void ImageBlend(Image dest, int destX, int destY, Image src, double alpha) {
+  // Verificações de validade dos parâmetros
+  if (dest == NULL || src == NULL) {
+    return;
+  }
 
-  // Preenche a imagem com os pixels da imagem a colar
-  for (int i = 0; i < img2->width * img2->height; i++) {
-    // Calcula as coordenadas do pixel na imagem original
-    int destX = i % img2->width + x;
-    int destY = i / img2->width + y;
+  int destWidth = ImageWidth(dest);
+  int destHeight = ImageHeight(dest);
+  int srcWidth = ImageWidth(src);
+  int srcHeight = ImageHeight(src);
 
-    // Obtém o índice linear para o pixel na imagem original
-    int destIndex = destY * img1->width + destX;
+  // Ajusta as coordenadas de origem para evitar acessos fora dos limites
+  destX = (destX < 0) ? 0 : destX;
+  destY = (destY < 0) ? 0 : destY;
 
-    // Obtém o índice linear para o pixel na imagem a colar
-    int pasteIndex = i;
+  // Calcula as coordenadas de origem ajustadas
+  int srcX = 0;
+  int srcY = 0;
 
-    // Combina os pixels usando a fórmula de blending linear
-    img1->pixel[destIndex] = img1->pixel[destIndex] * (1 - alpha) + img2->pixel[pasteIndex] * alpha;
+  // Ajusta as coordenadas se forem maiores que as dimensões da imagem de origem
+  if (destX + srcWidth > destWidth) {
+    srcX = srcWidth - (destX + srcWidth - destWidth);
+  }
+
+  if (destY + srcHeight > destHeight) {
+    srcY = srcHeight - (destY + srcHeight - destHeight);
+  }
+
+  // Executa a mistura
+  for (int y = 0; y < srcHeight && destY + y < destHeight; ++y) {
+    for (int x = 0; x < srcWidth && destX + x < destWidth; ++x) {
+      double destValue = ImageGetPixel(dest, destX + x, destY + y);
+      double srcValue = ImageGetPixel(src, srcX + x, srcY + y);
+      
+      // Fórmula de interpolação linear correta
+      double blendedValue = alpha * srcValue + (1.0 - alpha) * destValue;
+
+      // Arredonda para o valor mais próximo
+      uint8 pixelValue = (uint8)(blendedValue + 0.5);
+
+      // Define o pixel na imagem de destino
+      ImageSetPixel(dest, destX + x, destY + y, pixelValue);
+    }
   }
 }
+
+
+
+
 
 
 /// Compare an image to a subimage of a larger image.
@@ -733,9 +759,7 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// Each pixel is substituted by the mean of the pixels in the rectangle
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
-void ImageBlur(Image img, int dx, int dy) { ///
-  // Insert your code here!
-
+void ImageBlur(Image img, int dx, int dy) {
   int width = img->width;
   int height = img->height;
   uint8* blurredPixels = malloc(sizeof(uint8) * width * height);
@@ -747,7 +771,7 @@ void ImageBlur(Image img, int dx, int dy) { ///
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
-      int sum = 0;
+      double sum = 0.0;
       int count = 0;
 
       for (int j = -dy; j <= dy; j++) {
@@ -762,7 +786,7 @@ void ImageBlur(Image img, int dx, int dy) { ///
         }
       }
 
-      blurredPixels[y * width + x] = (count > 0) ? (sum / count) : img->pixel[y * width + x];
+      blurredPixels[y * width + x] = (count > 0) ? (uint8)(sum / count + 0.5) : img->pixel[y * width + x];
     }
   }
 
@@ -770,4 +794,3 @@ void ImageBlur(Image img, int dx, int dy) { ///
   memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
   free(blurredPixels);
 }
-
