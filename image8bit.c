@@ -758,25 +758,73 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
 void ImageBlur(Image img, int dx, int dy) {
-  int width = img->width;
-  int height = img->height;
-  uint8* blurredPixels = malloc(sizeof(uint8) * width * height);
+  int width = img->width; 
+  int height = img->height; 
+  uint8* blurredPixels = malloc(sizeof(uint8) * width * height); // Aloca memória para os pixels 
 
   if (blurredPixels == NULL) {
     // Falha na alocação de memória
     return;
   }
 
+// Percorre os pixels da imagem
+  for (int y = 0; y < height; y++) { 
+    for (int x = 0; x < width; x++) { 
+      double sum = 0.0; 
+      int count = 0;
+// Percorre os pixels da vizinhança
+      for (int j = -dy; j <= dy; j++) { 
+        for (int i = -dx; i <= dx; i++) {
+          int newX = x + i;
+          int newY = y + j; 
+// Verifica se o pixel está dentro da imagem
+          if (newX >= 0 && newX < width && newY >= 0 && newY < height) { 
+            sum += img->pixel[newY * width + newX]; 
+            count++;
+          }
+        }
+      }
+// Calcula a média dos pixels da vizinhança
+      blurredPixels[y * width + x] = (count > 0) ? (uint8)(sum / count + 0.5) : img->pixel[y * width + x]; // Arredonda para o inteiro mais próximo
+    }
+  }
+
+  // Copia os pixels borrados de volta para a imagem original
+  memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height); 
+  free(blurredPixels); // Libera a memória alocada
+}
+
+
+
+
+/// Blur an image with a proportional blur algorithm.
+/// The blur effect is proportional to the number of pixels in the image.
+/// The image is changed in-place.
+void ProportionalBlur(Image img) {
+  int width = img->width;
+  int height = img->height;
+  uint8* blurredPixels = malloc(sizeof(uint8) * width * height); // Aloca a memória para os pixels
+
+  if (blurredPixels == NULL) { // Falha na alocação de memória
+    
+    return;
+  }
+
+  double blurFactor = 1.0 / (width * height); // Calcula o fator do blur 
+
+// Percorre os pixels da imagem
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       double sum = 0.0;
       int count = 0;
 
-      for (int j = -dy; j <= dy; j++) {
-        for (int i = -dx; i <= dx; i++) {
+// Percorre os pixels da vizinhança
+      for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
           int newX = x + i;
           int newY = y + j;
 
+// Verifica se o pixel está dentro da imagem
           if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
             sum += img->pixel[newY * width + newX];
             count++;
@@ -784,11 +832,14 @@ void ImageBlur(Image img, int dx, int dy) {
         }
       }
 
-      blurredPixels[y * width + x] = (count > 0) ? (uint8)(sum / count + 0.5) : img->pixel[y * width + x];
+// Calcula a média dos pixels da vizinhança com o fator de blur
+      blurredPixels[y * width + x] = (count > 0) ? (uint8)(sum / count * blurFactor + 0.5) : img->pixel[y * width + x]; // Arredonda para o inteiro mais próximo
     }
   }
 
-  // Copia os pixels borrados de volta para a imagem original
+// Copia os pixels com blur de volta para a imagem original
   memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
-  free(blurredPixels);
+  free(blurredPixels); // Libera a memória alocada
 }
+
+
