@@ -467,20 +467,18 @@ void ImageThreshold(Image img, uint8 thr) { ///
 /// Multiply each pixel level by a factor, but saturate at maxval.
 /// This will brighten the image if factor>1.0 and
 /// darken the image if factor<1.0.
-void ImageBrighten(Image img, double factor) { ///
-  assert (img != NULL);
-  assert (factor >= 0.0);
-  // Insert your code here!
-  // Percorre o array de pixels
-  for (int i = 0; i < img->width * img->height; i++) {
-    // Aplica a transformacao
-    if (img->pixel[i] * factor > img->maxval) {
-      img->pixel[i] = img->maxval;
-    } else {
-      img->pixel[i] = img->pixel[i] * factor;
-      img->pixel[i] = round(img->pixel[i] * factor);
+void ImageBrighten(Image img, double factor) {
+    assert(img != NULL);
+    assert(factor >= 0.0);
+
+    // Percorre o array de pixels
+    for (int i = 0; i < img->width * img->height; i++) {
+        // Aplica a transformação
+        int newPixel = (int)(img->pixel[i] * factor + 0.5); // Arredonda para o inteiro mais próximo
+
+        // Garante que o valor esteja no intervalo permitido
+        img->pixel[i] = (uint8_t)(newPixel < 0 ? 0 : (newPixel > 255 ? 255 : newPixel));
     }
-  }
 }
 
 /// Geometric transformations
