@@ -55,6 +55,9 @@ struct image {
   uint8_t* pixel; // pixel data (a raster scan)
 };
 
+// No início do arquivo image8bit.c (ou onde as variáveis globais são definidas)
+unsigned long pixmemCount = 0;
+
 
 // This module follows "design-by-contract" principles.
 // Read `Design-by-Contract.md` for more details.
@@ -788,6 +791,8 @@ void ImageBlur(Image img, int dx, int dy) {
       blurredPixels[y * width + x] = (count > 0) ? (uint8)(sum / count + 0.5) : img->pixel[y * width + x]; // Arredonda para o inteiro mais próximo
     }
   }
+
+  pixmemCount += ImageWidth(img) * ImageHeight(img); // Conta o número de acessos à memória
 
   // Copia os pixels borrados de volta para a imagem original
   memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height); 
