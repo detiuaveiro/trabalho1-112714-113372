@@ -47,6 +47,7 @@
 // Maximum value you can store in a pixel (maximum maxval accepted)
 const uint8 PixMax = 255;
 
+
 // Internal structure for storing 8-bit graymap images
 struct image {
   int width;
@@ -697,6 +698,8 @@ void ImageBlend(Image dest, int destX, int destY, Image src, double alpha) {
       ImageSetPixel(dest, destX + x, destY + y, pixelValue);
     }
   }
+
+  pixmemCount += ImageWidth(dest) * ImageHeight(dest); // Conta o número de acessos à memória
 }
 
 
@@ -814,6 +817,7 @@ void ProportionalBlur(Image img) {
     
     return;
   }
+  
 
   double blurFactor = 1.0 / (width * height); // Calcula o fator do blur 
 

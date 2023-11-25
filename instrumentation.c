@@ -22,7 +22,6 @@
 #include "instrumentation.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 /// Cpu time in seconds
 double cpu_time(void) ; ///
@@ -34,8 +33,6 @@ double cpu_time(void) ; ///
 //
 
 #include <time.h>
-
-
 
 double cpu_time(void) {
   struct timespec current_time;
@@ -116,8 +113,7 @@ void InstrReset(void) {
 }
 
 // Print times and all named counter values
-// Print times and all named counter values
-void InstrPrint(void) {
+void InstrPrint(void) { ///
   // elapsed time since last reset:
   double time = cpu_time() - InstrTime;
   // compute time in calibrated time units:
@@ -125,12 +121,13 @@ void InstrPrint(void) {
 
   printf("#%14.15s\t%15.15s", "time", "caltime");
   for (int i = 0; i < NUMCOUNTERS; i++)
-    if (InstrName[i] != NULL && strcmp(InstrName[i], "pixmemCount") != 0) // ignore pixmemCount
+    if (InstrName[i] != NULL)
       printf("\t%15.15s", InstrName[i]);
   puts("");
-  printf("%15.6f\t%15.6f", time, caltime);
+  printf("%15.6f\t%15.6f\t%15lu", time, caltime, pixmemCount);
   for (int i = 0; i < NUMCOUNTERS; i++)
-    if (InstrName[i] != NULL && strcmp(InstrName[i], "pixmemCount") != 0) // ignore pixmemCount
-      printf("\t%15lu", InstrCount[i]);
+    if (InstrName[i] != NULL)
+      printf("\t%15lu", InstrCount[i]);  
   puts("");
 }
+
