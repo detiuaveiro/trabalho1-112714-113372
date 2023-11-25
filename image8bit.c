@@ -150,8 +150,8 @@ static int check(int condition, const char* failmsg) {
 /// Currently, simply calibrate instrumentation and set names of counters.
 void ImageInit(void) { ///
   InstrCalibrate();
-  InstrName[0] = "pixmem";  // InstrCount[0] will count pixel array acesses
-  // Name other counters here...
+  InstrName[0] = "pixmem8bits";  // InstrCount[0] will count pixel array acesses
+
   
 }
 
