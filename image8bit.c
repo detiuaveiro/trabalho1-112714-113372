@@ -850,5 +850,3 @@ void ProportionalBlur(Image img) {
   memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
   free(blurredPixels); // Libera a memória alocada
 }
-
-
