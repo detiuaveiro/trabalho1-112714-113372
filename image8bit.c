@@ -753,6 +753,7 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
       }
     }
   }
+    pixmemCount += ImageWidth(img1) * ImageHeight(img1); // Conta o número de acessos à memória
 
   return 0; // Nenhuma correspondência encontrada
 }
