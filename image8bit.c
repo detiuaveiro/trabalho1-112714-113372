@@ -810,6 +810,7 @@ void ImageBlur(Image img, int dx, int dy) {
 /// The blur effect is proportional to the number of pixels in the image.
 /// The image is changed in-place.
 void ProportionalBlur(Image img) {
+  printf("Estou a fazer o propotional blur");
   int width = img->width;
   int height = img->height;
   uint8* blurredPixels = malloc(sizeof(uint8) * width * height); // Aloca a memória para os pixels
