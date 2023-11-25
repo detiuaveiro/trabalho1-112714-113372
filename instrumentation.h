@@ -25,6 +25,10 @@
 /// Cpu time in seconds
 double cpu_time(void) ; ///
 
+// Dentro do arquivo instrumentation.h
+// Adicione a declaração externa para pixmemCount
+extern unsigned long pixmemCount;
+
 /// Ten counters should be more than enough
 #define NUMCOUNTERS 10
 

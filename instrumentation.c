@@ -102,10 +102,14 @@ void InstrCalibrate(void) { ///
 }
 
 /// Reset counters to zero and store cpu_time.
-void InstrReset(void) { ///
-  for (int i = 0; i < NUMCOUNTERS; i++)
-    InstrCount[i] = 0ul;
-  InstrTime = cpu_time();
+// Dentro da função InstrReset em instrumentation.c
+void InstrReset(void) {
+    for (int i = 0; i < NUMCOUNTERS; i++)
+        InstrCount[i] = 0ul;
+
+    pixmemCount = 0;  // Adicione esta linha para zerar a contagem de pixmem
+
+    InstrTime = cpu_time();
 }
 
 // Print times and all named counter values
@@ -120,7 +124,7 @@ void InstrPrint(void) { ///
     if (InstrName[i] != NULL)
       printf("\t%15.15s", InstrName[i]);
   puts("");
-  printf("%15.6f\t%15.6f", time, caltime);
+  printf("%15.6f\t%15.6f\t%15lu", time, caltime, pixmemCount);
   for (int i = 0; i < NUMCOUNTERS; i++)
     if (InstrName[i] != NULL)
       printf("\t%15lu", InstrCount[i]);  

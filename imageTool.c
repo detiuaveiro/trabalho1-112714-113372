@@ -221,6 +221,8 @@ int main(int ac, char* av[]) {
     ImageDestroy(&img[--n]);
   }
 
+  InstrPrint();
+
   error(err, errno, errors[err], ImageErrMsg());
   return 0;
 }
