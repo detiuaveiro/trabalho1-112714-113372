@@ -809,46 +809,37 @@ void ImageBlur(Image img, int dx, int dy) {
 /// Blur an image with a proportional blur algorithm.
 /// The blur effect is proportional to the number of pixels in the image.
 /// The image is changed in-place.
-void ProportionalBlur(Image img) {
-  printf("Estou a fazer o propotional blur\n");
+#include <stdlib.h>
+
+void ProportionalBlur(struct image* img, int dx, int dy) {
   int width = img->width;
   int height = img->height;
-  uint8* blurredPixels = malloc(sizeof(uint8) * width * height); // Aloca a memória para os pixels
+  uint8_t* blurredPixels = malloc(sizeof(uint8_t) * width * height);
 
-  if (blurredPixels == NULL) { // Falha na alocação de memória
-    
+  if (blurredPixels == NULL) {
+    // Falha na alocação de memória
     return;
   }
-  
-
-  double blurFactor = 1.0 / (width * height); // Calcula o fator do blur 
-
-// Percorre os pixels da imagem
-  for (int y = 0; y < height; y++) {
+  for (int y = 0; y < height; y++) { 
     for (int x = 0; x < width; x++) {
-      double sum = 0.0;
-      int count = 0;
+      double sum = 0.0; // Soma dos valores dos pixels
+      double weightsSum = 0.0; // Soma dos pesos dos pixels
 
-// Percorre os pixels da vizinhança
-      for (int j = -1; j <= 1; j++) {
-        for (int i = -1; i <= 1; i++) {
-          int newX = x + i;
-          int newY = y + j;
-
-// Verifica se o pixel está dentro da imagem
-          if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
-            sum += img->pixel[newY * width + newX];
-            count++;
-          }
+      // Percorre todos os pixels da imagem
+      for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+          double weight = 1.0 / ((x - i) * (x - i) + (y - j) * (y - j) + 1);
+          sum += img->pixel[j * width + i] * weight;
+          weightsSum += weight;
         }
       }
 
-// Calcula a média dos pixels da vizinhança com o fator de blur
-      blurredPixels[y * width + x] = (count > 0) ? (uint8)(sum / count * blurFactor + 0.5) : img->pixel[y * width + x]; // Arredonda para o inteiro mais próximo
-    }
+    blurredPixels[y * width + x] = (weightsSum > 0) ? (uint8_t)(sum / weightsSum + 0.5) : img->pixel[y * width + x];     
+  }
   }
 
-// Copia os pixels com blur de volta para a imagem original
-  memcpy(img->pixel, blurredPixels, sizeof(uint8) * width * height);
-  free(blurredPixels); // Libera a memória alocada
+  pixmemCount += ImageWidth(img) * ImageHeight(img); // Conta o número de acessos à memória
+
+  memcpy(img->pixel, blurredPixels, sizeof(uint8_t) * width * height);
+  free(blurredPixels);
 }
